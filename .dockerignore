@@ -1,0 +1,9 @@
+env
+.vscode
+scripts
+tests
+config
+.aws-sam
+.git
+**/__pycache__
+**/*.pyc
