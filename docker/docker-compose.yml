@@ -12,21 +12,13 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-#      target: development
     logging: *logging
     init: true
     ports:
       - 3000:3000
     tty: true
-    command: sleep infinity
-#    volumes:
-#      - ../src/users_crud:/app/users_crud
-#      - ../tests:/app/tests
-
-      # Mount poetry files to edit them from inside the container
-#      - ../pyproject.toml:/app/pyproject.toml
-#      - ../poetry.lock:/app/poetry.lock
-
-#    env_file:
-#      - ../config/api.env
-#      - ../config/db.env
+    env_file:
+      - ../config/api.env
+      - ../config/db.env
+    environment:
+        - ENVIRONMENT=production

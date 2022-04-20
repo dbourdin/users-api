@@ -57,6 +57,6 @@ RUN pip install -r requirements.txt
 
 COPY src/users_crud users_crud
 
-# EXPOSE 3000
+EXPOSE 3000
 
 CMD ["python3", "users_crud/app.py"]
