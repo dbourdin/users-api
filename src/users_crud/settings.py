@@ -51,7 +51,7 @@ class APISettings(BaseSettings):
             "host": str(self.HOST),
             "port": self.PORT,
             "log_level": self.LOGLEVEL.lower(),  # Uvicorn expects lowercase strings
-            "reload": True,
+            "reload": self.ENVIRONMENT == EnvironmentEnum.development,
         }
 
     POSTGRES_SERVER: str
