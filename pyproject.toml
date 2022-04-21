@@ -24,3 +24,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 manage = 'users_crud.cli.manage:app'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+known_first_party = ["users_crud"]
+known_third_party = ["alembic"]
+default_section="THIRDPARTY"
