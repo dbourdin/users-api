@@ -1,5 +1,6 @@
 """API initialization and setup file."""
 
+import uvicorn
 from fastapi import FastAPI
 
 from users_crud.api.v1.routers import router
@@ -32,3 +33,8 @@ if settings.ENVIRONMENT == EnvironmentEnum.development:
     def get_api_settings():
         """Get API Settings."""
         return settings
+
+
+if __name__ == "__main__":
+    uvicorn_settings = settings.get_uvicorn_settings()
+    uvicorn.run(**uvicorn_settings)
