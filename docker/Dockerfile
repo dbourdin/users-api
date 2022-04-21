@@ -34,7 +34,6 @@ RUN poetry config virtualenvs.create false
 # For development
 WORKDIR /build
 COPY pyproject.toml poetry.lock* ./
-RUN poetry install
 
 # # For production
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
@@ -50,13 +49,20 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 FROM python:3.10-slim-bullseye
 
+# Here goes our code. Added to make it importable
+ENV PYTHONPATH="/app"
+
+# Update and install required dependencies
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc
+
 RUN pip install -U pip
 
 COPY --from=development /build/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY src/users_crud users_crud
+COPY src app
 
 EXPOSE 3000
 
-CMD ["python3", "users_crud/app.py"]
+CMD ["python3", "app/users_crud/app.py"]
