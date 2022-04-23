@@ -32,9 +32,9 @@ async def get(
     """Retrieve an existing User.
 
     Args:
-        user_id (uuid.UUID): The uuid of the user to retrieve
-        current_user (User): Logged in User
         db (Session): A database session
+        current_user (User): Logged in User
+        user_id (uuid.UUID): The uuid of the user to retrieve
 
     Raises:
         HTTPException: When a resource with the given id is not found
@@ -93,8 +93,8 @@ async def create(
     """Create a new user.
 
     Args:
-        instance_in (schemas.UserCreateIn): Input data
         db (Session): A database session
+        instance_in (schemas.UserCreateIn): Input data
     """
     instance = crud.user.create(db, obj_in=instance_in)
     return instance
@@ -110,24 +110,35 @@ async def create(
 async def update(
     *,
     db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
     user_in: schemas.UserUpdateIn,
 ) -> Any:
     """Update an existing User.
 
     Args:
+        db (Session): A database session
+        current_user (User): Logged in Userç
         user_id (uuid.UUID): The uuid of the user to modify
         user_in (schemas.UserUpdateIn): The new data
-        db (Session): A database session
 
     Raises:
         HTTPException: When a resource with the given id is not found
     """
-    instance_db = crud.user.get_by_uuid(db, uuid=user_id)
+    if current_user.uuid == user_id:
+        instance_db = current_user
+    elif current_user.is_superuser:
+        instance_db = crud.user.get_by_uuid(db, uuid=user_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
+        )
+
     if instance_db is None:
         raise HTTPException(
-            status_code=404,
-            detail=f"User with Id {user_id} was not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     updated_instance = crud.user.update(db, db_obj=instance_db, obj_in=user_in)
 
