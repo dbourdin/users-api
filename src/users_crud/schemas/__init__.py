@@ -4,6 +4,7 @@ from users_crud.schemas.user import (
     UserCreateDB,
     UserCreateIn,
     UserCreateOut,
+    UserGet,
     UserList,
     UserUpdateDB,
     UserUpdateIn,

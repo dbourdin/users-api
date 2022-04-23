@@ -30,14 +30,15 @@ class UserCreateOut(BaseUserSchema):
     """Parameters returned in a POST request."""
 
     uuid: UUID
-    username: str
-    first_name: str | None
-    last_name: str | None
     created_at: datetime
     updated_at: datetime
 
 
-class UserList(UserCreateOut):
+class UserGet(UserCreateOut):
+    """Parameters returned in a GET request."""
+
+
+class UserList(UserGet):
     """Parameters returned in a GET LIST request."""
 
 
