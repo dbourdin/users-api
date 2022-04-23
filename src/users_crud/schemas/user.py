@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from users_crud.schemas.base import APISchema
+from users_crud.schemas.base import APIMessage, APISchema
 
 
 class BaseUserSchema(APISchema):
@@ -63,7 +63,7 @@ class UserUpdateOut(UserCreateOut):
 class UserUpdatePasswordIn(APISchema):
     """Parameters received in an update password PUT request."""
 
-    old_password: str = Field(..., example="my_old_password")
+    old_password: str = Field("", example="my_old_password")
     new_password: str = Field(..., example="my_new_password")
 
 
@@ -71,5 +71,5 @@ class UserUpdatePasswordDB(UserUpdatePasswordIn):
     """Model used to update a User password in an update password PUT request."""
 
 
-class UserUpdatePasswordOut(UserCreateOut):
+class UserUpdatePasswordOut(APIMessage):
     """Parameters returned in an update password PUT request."""

@@ -10,4 +10,7 @@ from users_crud.schemas.user import (
     UserUpdateDB,
     UserUpdateIn,
     UserUpdateOut,
+    UserUpdatePasswordDB,
+    UserUpdatePasswordIn,
+    UserUpdatePasswordOut,
 )
