@@ -60,15 +60,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         Args:
             db (Session): A database session
             skip (int): How many rows to skip. Defaults to 0.
-            limit (int): How many rows to return. Defaults to 100.
+            limit (int): How many rows to return. Defaults to 1000.
 
         Returns:
             list[ModelType]: The retrieved rows
         """
         # Construct the actual query
-        items = db.query(self.model).offset(skip).limit(limit).all()
-
-        return items
+        return db.query(self.model).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new row.
