@@ -14,6 +14,7 @@ class BaseUserSchema(APISchema):
     username: str = Field(..., example="my_username")
     first_name: str | None = Field(example="John")
     last_name: str | None = Field(example="Doe")
+    is_superuser: bool = False
 
 
 class UserCreateIn(BaseUserSchema):
