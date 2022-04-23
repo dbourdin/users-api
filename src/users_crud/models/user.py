@@ -1,6 +1,6 @@
 """User database table."""
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
 from users_crud.api import security
 from users_crud.db.base_class import Base
@@ -13,6 +13,7 @@ class User(Base):
     first_name = Column(String)
     last_name = Column(String)
     password_hash = Column(String)
+    is_superuser = Column(Boolean(), default=False)
 
     @property
     def password(self):
