@@ -17,8 +17,8 @@ router = APIRouter()
     "/{user_id}",
     response_model=schemas.UserGet,
     responses={
-        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
         status.HTTP_403_FORBIDDEN: {"model": schemas.APIMessage},
+        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
     },
     summary="Retrieve a single User by UUID",
     description="Retrieve single a User by UUID",
@@ -103,7 +103,10 @@ async def create(
 @router.put(
     "/{user_id}",
     response_model=schemas.UserUpdateOut,
-    responses={status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage}},
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": schemas.APIMessage},
+        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
+    },
     summary="Edit a User",
     description="Edit a User",
 )
@@ -143,3 +146,64 @@ async def update(
     updated_instance = crud.user.update(db, db_obj=instance_db, obj_in=user_in)
 
     return updated_instance
+
+
+@router.put(
+    "/{user_id}/password",
+    response_model=schemas.UserUpdatePasswordOut,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": schemas.APIMessage},
+        status.HTTP_403_FORBIDDEN: {"model": schemas.APIMessage},
+        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
+    },
+    summary="Edit a User",
+    description="Edit a User",
+)
+async def update_password(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+    user_id: uuid.UUID,
+    update_password_data: schemas.UserUpdatePasswordIn,
+) -> Any:
+    """Update an existing User.
+
+    Args:
+        db (Session): A database session
+        current_user (User): Logged in User
+        user_id (uuid.UUID): The uuid of the user to modify
+        update_password_data (schemas.UserUpdatePasswordIn): The update password data
+
+    Raises:
+        HTTPException: When a resource with the given id is not found, the user
+            does not have enough privileges or the submitted password is incorrect
+    """
+    if current_user.uuid == user_id:
+        db_user = current_user
+    elif current_user.is_superuser:
+        db_user = crud.user.get_by_uuid(db, uuid=user_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
+        )
+
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if not current_user.is_superuser and not db_user.verify_password(
+        update_password_data.old_password
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Submitted password does not match",
+        )
+
+    crud.user.update_password(
+        db, db_user=db_user, new_password=update_password_data.new_password
+    )
+
+    return schemas.UserUpdatePasswordOut(detail="Password updated successfully")
