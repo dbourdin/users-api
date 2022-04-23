@@ -11,23 +11,28 @@ from users_crud.schemas.base import APISchema
 class BaseUserSchema(APISchema):
     """Base User API Model."""
 
-    username: str = Field(..., example="my_username")
     first_name: str | None = Field(example="John")
     last_name: str | None = Field(example="Doe")
-    is_superuser: bool = False
 
 
-class UserCreateIn(BaseUserSchema):
+class BaseUserSchemaWithUsername(BaseUserSchema):
+    """Base User API Model with username."""
+
+    username: str = Field(..., example="my_username")
+
+
+class UserCreateIn(BaseUserSchemaWithUsername):
     """Parameters received in a POST request."""
 
     password: str = Field(..., example="my_password")
+    is_superuser: bool = False
 
 
 class UserCreateDB(UserCreateIn):
     """Model used to create a new record in a POST request."""
 
 
-class UserCreateOut(BaseUserSchema):
+class UserCreateOut(BaseUserSchemaWithUsername):
     """Parameters returned in a POST request."""
 
     uuid: UUID
@@ -43,13 +48,28 @@ class UserList(UserGet):
     """Parameters returned in a GET LIST request."""
 
 
-class UserUpdateIn(UserCreateIn):
+class UserUpdateIn(BaseUserSchema):
     """Parameters received in a PUT request."""
 
 
-class UserUpdateDB(UserCreateDB):
+class UserUpdateDB(UserUpdateIn):
     """Model used to update a record in a PUT request."""
 
 
 class UserUpdateOut(UserCreateOut):
     """Parameters returned in a PUT request."""
+
+
+class UserUpdatePasswordIn(APISchema):
+    """Parameters received in an update password PUT request."""
+
+    old_password: str = Field(..., example="my_old_password")
+    new_password: str = Field(..., example="my_new_password")
+
+
+class UserUpdatePasswordDB(UserUpdatePasswordIn):
+    """Model used to update a User password in an update password PUT request."""
+
+
+class UserUpdatePasswordOut(UserCreateOut):
+    """Parameters returned in an update password PUT request."""
