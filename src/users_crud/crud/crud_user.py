@@ -41,5 +41,29 @@ class CRUDUser(CRUDBase[User, UserCreateDB, UserUpdateDB]):
             return None
         return user_
 
+    @staticmethod
+    def update_password(
+        db: Session,
+        *,
+        db_user: User,
+        new_password: str,
+    ) -> User:
+        """Update a row.
+
+        Args:
+            db (Session): A database session
+            db_user (User): Old user in db
+            new_password (str): New password to be updated
+
+        Returns:
+            User: The updated User
+        """
+        if new_password:
+            db_user.password = new_password
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
 
 user = CRUDUser(User)
