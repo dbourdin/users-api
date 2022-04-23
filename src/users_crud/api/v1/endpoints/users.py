@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from users_crud import crud, schemas
 from users_crud.api import deps
+from users_crud.models.user import User
 
 router = APIRouter()
 
@@ -15,32 +16,46 @@ router = APIRouter()
 @router.get(
     "/{user_id}",
     response_model=schemas.UserGet,
-    responses={status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage}},
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
+        status.HTTP_403_FORBIDDEN: {"model": schemas.APIMessage},
+    },
     summary="Retrieve a single User by UUID",
     description="Retrieve single a User by UUID",
 )
 async def get(
     *,
     db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
 ) -> Any:
     """Retrieve an existing User.
 
     Args:
         user_id (uuid.UUID): The uuid of the user to retrieve
+        current_user (User): Logged in User
         db (Session): A database session
 
     Raises:
         HTTPException: When a resource with the given id is not found
     """
-    instance_db = crud.user.get_by_uuid(db, uuid=user_id)
-    if instance_db is None:
+    if current_user.uuid == user_id:
+        return current_user
+
+    if not current_user.is_superuser:
         raise HTTPException(
-            status_code=404,
-            detail=f"User with Id {user_id} was not found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
         )
 
-    return instance_db
+    db_user = crud.user.get_by_uuid(db, uuid=user_id)
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    return db_user
 
 
 @router.get(
