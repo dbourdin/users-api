@@ -1,9 +1,10 @@
 """Token Schemas."""
+from pydantic import BaseModel
 
 from users_crud.schemas.base import APISchema
 
 
-class Token(APISchema):
+class Token(BaseModel):
     """Token Schema."""
 
     access_token: str
@@ -13,4 +14,5 @@ class Token(APISchema):
 class TokenData(APISchema):
     """TokenData Schema."""
 
-    uuid: str | None = None
+    exp: str
+    sub: str
