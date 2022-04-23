@@ -1,9 +1,11 @@
 """User database table."""
 
-import bcrypt
+from passlib.context import CryptContext
 from sqlalchemy import Column, String
 
 from users_crud.db.base_class import Base
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class User(Base):
@@ -22,13 +24,8 @@ class User(Base):
     @password.setter
     def password(self, password):
         """Password hashing."""
-        salt = bcrypt.gensalt()
-        if isinstance(password, str):
-            password = password.encode("utf8")
-        self.password_hash = bcrypt.hashpw(password, salt)
+        self.password_hash = pwd_context.hash(password)
 
     def verify_password(self, password):
         """Password validator."""
-        if isinstance(password, str):
-            password = password.encode("utf8")
-        return bcrypt.checkpw(password, self.password_hash)
+        return pwd_context.verify(password, self.password_hash)
