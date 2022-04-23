@@ -13,6 +13,37 @@ router = APIRouter()
 
 
 @router.get(
+    "/{user_id}",
+    response_model=schemas.UserGet,
+    responses={status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage}},
+    summary="Retrieve a single User by UUID",
+    description="Retrieve single a User by UUID",
+)
+async def get(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: uuid.UUID,
+) -> Any:
+    """Retrieve an existing User.
+
+    Args:
+        user_id (uuid.UUID): The uuid of the user to retrieve
+        db (Session): A database session
+
+    Raises:
+        HTTPException: When a resource with the given id is not found
+    """
+    instance_db = crud.user.get_by_uuid(db, uuid=user_id)
+    if instance_db is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with Id {user_id} was not found",
+        )
+
+    return instance_db
+
+
+@router.get(
     "",
     response_model=list[schemas.UserList],
     summary="List Users",
