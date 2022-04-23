@@ -66,11 +66,13 @@ async def get(
 )
 def retrieve_many(
     db: Session = Depends(deps.get_db),
+    current_superuser: User = Depends(deps.get_current_superuser),
 ) -> Any:
     """Retrieve many users.
 
     Args:
         db (Session): A database session
+        current_superuser (User): Currently logged in superuser
     """
     instance_list = crud.user.get_multi(db)
     return instance_list
