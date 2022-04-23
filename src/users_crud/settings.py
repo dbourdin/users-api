@@ -54,6 +54,7 @@ class APISettings(BaseSettings):
             "reload": self.ENVIRONMENT == EnvironmentEnum.development,
         }
 
+    # Settings related to Postgres configuration
     POSTGRES_SERVER: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -74,6 +75,10 @@ class APISettings(BaseSettings):
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB')}",
         )
+
+    # Settings related to JWT
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_KEY: str
 
     # To use the API behind a proxy, set this variable to the desired base route
     # This will make the /docs URL work properly
