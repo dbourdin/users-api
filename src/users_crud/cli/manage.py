@@ -24,6 +24,15 @@ def start_reload():
 
 
 @app.command()
+def start():
+    """Start the API with Uvicorn."""
+    uvicorn_settings = settings.get_uvicorn_settings()
+    uvicorn_settings["reload"] = False
+    print(f"Starting uvicorn with these settings: \n{pformat(uvicorn_settings)}")
+    uvicorn.run(**uvicorn_settings)
+
+
+@app.command()
 def migrate():
     """Apply migrations to the database."""
     os.chdir("alembic")
