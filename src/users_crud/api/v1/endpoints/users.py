@@ -4,6 +4,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from users_crud import crud, schemas
@@ -82,22 +83,33 @@ def retrieve_many(
     "",
     response_model=schemas.UserCreateOut,
     status_code=status.HTTP_201_CREATED,
+    responses={status.HTTP_400_BAD_REQUEST: {"model": schemas.APIMessage}},
     summary="Create a User",
     description="Create a User",
 )
 async def create(
     *,
     db: Session = Depends(deps.get_db),
-    instance_in: schemas.UserCreateIn,
+    user_in: schemas.UserCreateIn,
 ) -> Any:
     """Create a new user.
 
     Args:
         db (Session): A database session
-        instance_in (schemas.UserCreateIn): Input data
+        user_in (schemas.UserCreateIn): Input data
+
+    Raises:
+        HTTPException: List of exceptions:
+            - HTTP_400_BAD_REQUEST: If username already exists.
     """
-    instance = crud.user.create(db, obj_in=instance_in)
-    return instance
+    try:
+        db_user = crud.user.create(db, obj_in=user_in)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with username '{user_in.username}' already exists",
+        )
+    return db_user
 
 
 @router.put(
@@ -207,3 +219,50 @@ async def update_password(
     )
 
     return schemas.UserUpdatePasswordOut(detail="Password updated successfully")
+
+
+@router.delete(
+    "/{user_id}",
+    responses={
+        status.HTTP_403_FORBIDDEN: {"model": schemas.APIMessage},
+        status.HTTP_404_NOT_FOUND: {"model": schemas.APIMessage},
+    },
+    summary="Delete a User",
+    description="Delete a User",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+    user_id: uuid.UUID,
+) -> Any:
+    """Update an existing User.
+
+    Args:
+        db (Session): A database session
+        current_user (User): Logged in User
+        user_id (uuid.UUID): The uuid of the user to modify
+
+    Raises:
+        HTTPException: List of exceptions:
+            - HTTP_403_FORBIDDEN: If the user doesn't have enough privileges.
+            - HTTP_404_NOT_FOUND: If provided user_id doesn't exist.
+    """
+    if current_user.uuid == user_id:
+        db_user = current_user
+    elif current_user.is_superuser:
+        db_user = crud.user.get_by_uuid(db, uuid=user_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
+        )
+
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    crud.user.remove(db, id=db_user.id)
