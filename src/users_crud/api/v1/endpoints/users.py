@@ -7,9 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from users_crud import crud, schemas
+from users_crud import crud, models, schemas
 from users_crud.api import deps
-from users_crud.models.user import User
 
 router = APIRouter()
 
@@ -27,14 +26,14 @@ router = APIRouter()
 async def get(
     *,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
 ) -> Any:
     """Retrieve an existing User.
 
     Args:
         db (Session): A database session
-        current_user (User): Logged in User
+        current_user (models.User): Logged in User
         user_id (uuid.UUID): The uuid of the user to retrieve
 
     Raises:
@@ -67,13 +66,13 @@ async def get(
 )
 def retrieve_many(
     db: Session = Depends(deps.get_db),
-    current_superuser: User = Depends(deps.get_current_superuser),
+    current_superuser: models.User = Depends(deps.get_current_superuser),
 ) -> Any:
     """Retrieve many users.
 
     Args:
         db (Session): A database session
-        current_superuser (User): Currently logged in superuser
+        current_superuser (models.User): Currently logged in superuser
     """
     instance_list = crud.user.get_multi(db)
     return instance_list
@@ -125,7 +124,7 @@ async def create(
 async def update(
     *,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
     user_in: schemas.UserUpdateIn,
 ) -> Any:
@@ -133,7 +132,7 @@ async def update(
 
     Args:
         db (Session): A database session
-        current_user (User): Logged in Userç
+        current_user (models.User): Logged in User
         user_id (uuid.UUID): The uuid of the user to modify
         user_in (schemas.UserUpdateIn): The new data
 
@@ -174,7 +173,7 @@ async def update(
 async def update_password(
     *,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
     update_password_data: schemas.UserUpdatePasswordIn,
 ) -> Any:
@@ -182,7 +181,7 @@ async def update_password(
 
     Args:
         db (Session): A database session
-        current_user (User): Logged in User
+        current_user (models.User): Logged in User
         user_id (uuid.UUID): The uuid of the user to modify
         update_password_data (schemas.UserUpdatePasswordIn): The update password data
 
@@ -234,14 +233,14 @@ async def update_password(
 async def delete(
     *,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.get_current_user),
     user_id: uuid.UUID,
 ) -> Any:
     """Update an existing User.
 
     Args:
         db (Session): A database session
-        current_user (User): Logged in User
+        current_user (models.User): Logged in User
         user_id (uuid.UUID): The uuid of the user to modify
 
     Raises:
