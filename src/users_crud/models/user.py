@@ -1,7 +1,6 @@
 """User database table."""
 
 from sqlalchemy import Boolean, Column, String
-from sqlalchemy.orm import validates
 
 from users_crud.api import security
 from users_crud.db.base_class import Base
@@ -10,7 +9,7 @@ from users_crud.db.base_class import Base
 class User(Base):
     """User database table."""
 
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True)
     first_name = Column(String)
     last_name = Column(String)
     password_hash = Column(String)
@@ -29,10 +28,3 @@ class User(Base):
     def verify_password(self, password):
         """Password validator."""
         return security.verify_password(password, self.password_hash)
-
-    @validates("username")
-    def validates_username(self, key, value):
-        """Block username from being modified."""
-        if self.username and self.username != value:  # Field already exists
-            raise ValueError("Username cannot be modified.")
-        return value
