@@ -31,9 +31,11 @@ RUN poetry config virtualenvs.create false
 
 ############### Install dependencies ###############
 
-# For development
-WORKDIR /build
+
+WORKDIR /app
 COPY pyproject.toml poetry.lock* ./
+
+# For development
 RUN poetry install
 
 # # For production
@@ -41,9 +43,8 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 ############### Finish up build ###############
 
-WORKDIR /app
 EXPOSE 3000
-CMD ["python", "users_crud/cli/manage.py", "start-reload"]
+CMD ["poetry", "run", "manage", "start-reload"]
 
 
 ############################## Production stage ##############################
@@ -53,11 +54,10 @@ FROM python:3.10-slim-bullseye
 RUN pip install -U pip
 RUN pip install uvicorn[standard]
 
-COPY src app
 WORKDIR /app
-COPY --from=development /build/requirements.txt .
+COPY src .
+COPY --from=development /app/requirements.txt .
 RUN pip install -r requirements.txt
 
 EXPOSE 3000
-
 CMD ["uvicorn", "users_crud.app:app", "--host", "0.0.0.0", "--port", "3000", "--log-level", "info"]
