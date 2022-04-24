@@ -34,35 +34,30 @@ RUN poetry config virtualenvs.create false
 # For development
 WORKDIR /build
 COPY pyproject.toml poetry.lock* ./
+RUN poetry install
 
 # # For production
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 ############### Finish up build ###############
 
-# WORKDIR /app
-# EXPOSE 3000
-# CMD ["python", "manage.py", "start-reload"]
+WORKDIR /app
+EXPOSE 3000
+CMD ["python", "users_crud/cli/manage.py", "start-reload"]
 
 
 ############################## Production stage ##############################
 
 FROM python:3.10-slim-bullseye
 
-# Here goes our code. Added to make it importable
-ENV PYTHONPATH="/app"
-
-# Update and install required dependencies
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc
-
 RUN pip install -U pip
+RUN pip install uvicorn[standard]
 
+COPY src app
+WORKDIR /app
 COPY --from=development /build/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY src app
-
 EXPOSE 3000
 
-CMD ["python3", "app/users_crud/app.py"]
+CMD ["uvicorn", "users_crud.app:app", "--host", "0.0.0.0", "--port", "3000", "--log-level", "info"]
