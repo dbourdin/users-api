@@ -105,3 +105,27 @@ def mock_current_user_superuser():
         app, overrides={deps.get_current_user: _get_current_user_override}
     ) as overrider:
         yield overrider
+
+
+@pytest.fixture
+def create_user_data():
+    """Return mocked username and password."""
+    return {
+        "username": TEST_USER["username"],
+        "password": TEST_USER["password"],
+    }
+
+
+@pytest.fixture
+def create_user_data_multi():
+    """Return mocked username and password."""
+    return [
+        {
+            "username": "user1",
+            "password": "password",
+        },
+        {
+            "username": "user2",
+            "password": "password",
+        },
+    ]
