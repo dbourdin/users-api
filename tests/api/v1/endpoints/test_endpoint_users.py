@@ -329,3 +329,71 @@ def test_update_user_password_throws_404_if_not_found(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.text
 
     crud_user_mock.get_by_uuid.assert_called_once()
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_delete_user(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Delete a User via DELETE."""
+    crud_user_mock.remove.return_value = None
+
+    response = client.delete(f"/v1/users/{TEST_USER['uuid']}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT, response.text
+
+    crud_user_mock.remove.assert_called_once_with(mock.ANY, id=TEST_USER["id"])
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_delete_user_as_superuser(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user_superuser,
+):
+    """Delete a User via DELETE as superuser."""
+    crud_user_mock.get_by_uuid.return_value = models.User(**TEST_USER)
+    crud_user_mock.remove.return_value = None
+
+    response = client.delete(f"/v1/users/{TEST_USER['uuid']}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT, response.text
+
+    crud_user_mock.get_by_uuid.assert_called_once_with(mock.ANY, uuid=TEST_USER["uuid"])
+    crud_user_mock.remove.assert_called_once_with(mock.ANY, id=TEST_USER["id"])
+
+
+def test_delete_user_throws_401_if_unauthorized(
+    client: TestClient,
+):
+    """Delete User password returns 401 if unauthorized."""
+    response = client.delete(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
+
+
+def test_delete_user_without_privileges_throws_403(
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Delete User password returns 403 if unauthorized."""
+    response = client.delete(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_403_FORBIDDEN, response.text
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_delete_user_throws_404_if_not_found(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user_superuser,
+):
+    """Delete User password returns 404 if user is not found."""
+    crud_user_mock.get_by_uuid.return_value = None
+
+    response = client.delete(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.text
+
+    crud_user_mock.get_by_uuid.assert_called_once()
