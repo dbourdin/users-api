@@ -37,7 +37,9 @@ async def get(
         user_id (uuid.UUID): The uuid of the user to retrieve
 
     Raises:
-        HTTPException: When a resource with the given id is not found
+        HTTPException: List of exceptions:
+            - HTTP_403_FORBIDDEN: If the user doesn't have enough privileges.
+            - HTTP_404_NOT_FOUND: If the user does not exist.
     """
     if current_user.uuid == user_id:
         return current_user
