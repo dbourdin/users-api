@@ -60,9 +60,9 @@ class CRUDUser(CRUDBase[User, UserCreateDB, UserUpdateDB]):
         """
         if new_password:
             db_user.password = new_password
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+            db.add(db_user)
+            db.commit()
+            db.refresh(db_user)
         return db_user
 
 
