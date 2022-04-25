@@ -1,5 +1,7 @@
 """Main pytest config file."""
 
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import PostgresDsn
@@ -7,6 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists
 
+from tests.utils import TEST_USER, DependencyOverrider
+from users_api import models
 from users_api.api import deps
 from users_api.app import app
 from users_api.db.base_class import Base
@@ -77,3 +81,34 @@ def client(db_fixture) -> TestClient:
 
     app.dependency_overrides[deps.get_db] = _get_db_override
     return TestClient(app)
+
+
+@pytest.fixture
+def mock_current_user():
+    """Return a faked current_user."""
+
+    def _get_current_user_override():
+        return models.User(**TEST_USER)
+
+    with DependencyOverrider(
+        app, overrides={deps.get_current_user: _get_current_user_override}
+    ) as overrider:
+        yield overrider
+
+
+@pytest.fixture
+def mock_current_user_superuser():
+    """Return a faked current_user."""
+
+    def _get_current_user_override():
+        superuser = TEST_USER.copy()
+        superuser["uuid"] = uuid.uuid4()
+        superuser["username"] = "admin"
+        superuser["password"] = "admin"
+        superuser["is_superuser"] = True
+        return models.User(**superuser)
+
+    with DependencyOverrider(
+        app, overrides={deps.get_current_user: _get_current_user_override}
+    ) as overrider:
+        yield overrider
