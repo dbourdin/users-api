@@ -1,7 +1,6 @@
 """Test /users endpoints."""
 
 import uuid
-from datetime import datetime, timezone
 from unittest import mock
 
 from fastapi import status
@@ -18,25 +17,16 @@ def test_create_user(
     client: TestClient,
 ):
     """Create a User via POST."""
-    user = {"username": "test_user", "password": "password"}
-    data_to_send = schemas.UserCreateIn(**user)
+    data_to_send = schemas.UserCreateIn(**TEST_USER)
 
-    uid = uuid.uuid4()
-    dt = datetime.now(timezone.utc)
-    return_value = {
-        "username": user["username"],
-        "uuid": uid,
-        "created_at": dt,
-        "updated_at": dt,
-    }
-    crud_user_mock.create.return_value = return_value
+    crud_user_mock.create.return_value = TEST_USER
 
     response = client.post("/v1/users", json=data_to_send.dict())
 
     assert response.status_code == status.HTTP_201_CREATED, response.text
 
     received = schemas.UserCreateOut.parse_raw(response.text)
-    expected = schemas.UserCreateOut.parse_obj(return_value)
+    expected = schemas.UserCreateOut.parse_obj(TEST_USER)
     assert received == expected
 
     crud_user_mock.create.assert_called_once()
@@ -48,8 +38,7 @@ def test_create_user_integrity_error_throws_400(
     client: TestClient,
 ):
     """Create a User via POST."""
-    user = {"username": "test_user", "password": "password"}
-    data_to_send = schemas.UserCreateIn(**user)
+    data_to_send = schemas.UserCreateIn(**TEST_USER)
     crud_user_mock.create.side_effect = IntegrityError(
         "IntegrityError", "params", "orig"
     )
@@ -79,8 +68,7 @@ def test_get_user_throws_401_if_unauthorized(
     client: TestClient,
 ):
     """Get User returns 401 if unauthorized."""
-    uid = uuid.uuid4()
-    response = client.get(f"/v1/users/{uid}")
+    response = client.get(f"/v1/users/{uuid.uuid4()}")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
 
