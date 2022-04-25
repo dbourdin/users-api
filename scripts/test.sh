@@ -4,15 +4,21 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+function wait_for_db {
+    echo "Waiting db startup..."
+    until docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml exec db pg_isready ; do sleep 1 ; done
+    echo "DB is ready!"
+}
+
 # Ensure all containers are down
 docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml down
 
+# Start environment and wait for DB
+docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml up -d users-api
+wait_for_db
+
 # Run tests
-docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml \
- run \
- --rm \
- users-api \
- pytest --cov="users_api" $@
+docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml exec users-api pytest --cov="users_api" $@
 
 # Tear down environment
 docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml down
