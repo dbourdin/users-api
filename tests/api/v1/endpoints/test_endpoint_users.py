@@ -8,6 +8,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
+from tests.conftest import TEST_USER
 from users_api import schemas
 
 
@@ -58,3 +59,54 @@ def test_create_user_integrity_error_throws_400(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.text
 
     crud_user_mock.create.assert_called_once()
+
+
+def test_get_user(
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Get a User via GET."""
+    response = client.get(f"/v1/users/{TEST_USER['uuid']}")
+    assert response.status_code == status.HTTP_200_OK, response.text
+
+    received = schemas.UserGet.parse_raw(response.text)
+    expected = schemas.UserGet.parse_obj(TEST_USER)
+    assert received == expected
+
+
+def test_get_user_throws_401_if_unauthorized(
+    client: TestClient,
+):
+    """Get User returns 401 if unauthorized."""
+    uid = uuid.uuid4()
+    response = client.get(f"/v1/users/{uid}")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
+
+
+def test_get_user_without_privileges_throws_403(
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Get User returns 403 if unauthorized."""
+    response = client.get(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_403_FORBIDDEN, response.text
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_get_user_as_superuser(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return superuser
+    mock_current_user_superuser,
+):
+    """Get User returns as superuser."""
+    crud_user_mock.get_by_uuid.return_value = TEST_USER
+    response = client.get(f"/v1/users/{TEST_USER['uuid']}")
+    assert response.status_code == status.HTTP_200_OK, response.text
+
+    received = schemas.UserGet.parse_raw(response.text)
+    expected = schemas.UserGet.parse_obj(TEST_USER)
+    assert received == expected
