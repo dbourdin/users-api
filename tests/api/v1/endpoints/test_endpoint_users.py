@@ -127,3 +127,96 @@ def test_list_users_without_permissions_throws_401(
     response = client.get("/v1/users")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_update_user(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Update User via PUT."""
+    update_data = {
+        "first_name": "John",
+        "last_name": "Doe",
+    }
+    data_to_send = schemas.UserUpdateIn(**update_data)
+    TEST_USER.update(data_to_send)
+
+    crud_user_mock.update.return_value = TEST_USER
+
+    response = client.put(f"/v1/users/{TEST_USER['uuid']}", json=data_to_send.dict())
+    assert response.status_code == status.HTTP_200_OK, response.text
+
+    received = schemas.UserUpdateOut.parse_raw(response.text)
+    expected = schemas.UserUpdateOut.parse_obj(TEST_USER)
+    assert received == expected
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_update_user_as_superuser(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user_superuser,
+):
+    """Update User via PUT."""
+    update_data = {
+        "first_name": "John",
+        "last_name": "Doe",
+    }
+    data_to_send = schemas.UserUpdateIn(**update_data)
+    TEST_USER.update(data_to_send)
+
+    user_mock = mock.MagicMock()
+    crud_user_mock.get_by_uuid.return_value = user_mock
+    crud_user_mock.update.return_value = TEST_USER
+
+    uid = TEST_USER["uuid"]
+    response = client.put(f"/v1/users/{uid}", json=data_to_send.dict())
+    assert response.status_code == status.HTTP_200_OK, response.text
+
+    received = schemas.UserUpdateOut.parse_raw(response.text)
+    expected = schemas.UserUpdateOut.parse_obj(TEST_USER)
+    assert received == expected
+
+    crud_user_mock.get_by_uuid.assert_called_once_with(mock.ANY, uuid=uid)
+    crud_user_mock.update.assert_called_once_with(
+        mock.ANY,
+        db_obj=user_mock,
+        obj_in=data_to_send,
+    )
+
+
+def test_update_user_throws_401_if_unauthorized(
+    client: TestClient,
+):
+    """Update User returns 401 if unauthorized."""
+    response = client.put(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
+
+
+def test_update_user_without_privileges_throws_403(
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Update User returns 403 if unauthorized."""
+    data_to_send = schemas.UserUpdateIn(first_name="John", last_name="Doe")
+    response = client.put(f"/v1/users/{uuid.uuid4()}", json=data_to_send.dict())
+    assert response.status_code == status.HTTP_403_FORBIDDEN, response.text
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_update_user_throws_404_if_not_found(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user_superuser,
+):
+    """Update User returns 404 if user is not found."""
+    crud_user_mock.get_by_uuid.return_value = None
+    data_to_send = schemas.UserUpdateIn(first_name="John", last_name="Doe")
+    response = client.put(f"/v1/users/{uuid.uuid4()}", json=data_to_send.dict())
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.text
