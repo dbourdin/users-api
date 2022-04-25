@@ -99,6 +99,22 @@ def test_get_user_without_privileges_throws_403(
 
 
 @mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_get_user_throws_404_if_not_found(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user_superuser,
+):
+    """Get User returns 404 if user is not found."""
+    crud_user_mock.get_by_uuid.return_value = None
+
+    response = client.get(f"/v1/users/{uuid.uuid4()}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.text
+
+    crud_user_mock.get_by_uuid.assert_called_once()
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
 def test_list_users(
     crud_user_mock,
     client: TestClient,
@@ -284,6 +300,26 @@ def test_update_user_password_as_superuser(
     )
 
 
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_update_user_password_throws_400_if_wrong_password(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return TEST_USER
+    mock_current_user,
+):
+    """Update User password returns 400 if 'old_password' is incorrect."""
+    crud_user_mock.get_by_uuid.return_value = models.User(**TEST_USER)
+    update_data = {
+        "old_password": "wrong_password",
+        "new_password": "new_password",
+    }
+    data_to_send = schemas.UserUpdatePasswordIn(**update_data)
+    uid = TEST_USER["uuid"]
+
+    response = client.put(f"/v1/users/{uid}/password", json=data_to_send.dict())
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.text
+
+
 def test_update_user_password_throws_401_if_unauthorized(
     client: TestClient,
 ):
@@ -325,7 +361,9 @@ def test_update_user_password_throws_404_if_not_found(
     }
     data_to_send = schemas.UserUpdatePasswordIn(**update_data)
 
-    response = client.put(f"/v1/users/{uuid.uuid4()}", json=data_to_send.dict())
+    response = client.put(
+        f"/v1/users/{uuid.uuid4()}/password", json=data_to_send.dict()
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.text
 
     crud_user_mock.get_by_uuid.assert_called_once()
