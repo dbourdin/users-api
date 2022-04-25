@@ -32,11 +32,7 @@ def init_db(test_db_uri: PostgresDsn) -> Session:
     """Create a new database and yield a sessionmaker. Then drop the db tables."""
     engine = create_engine(test_db_uri, pool_pre_ping=True)
 
-    print("PRE CREATE")
-    print(f"Engine: {engine.url}")
-    print(f"Exists: {database_exists(engine.url)}")
     if not database_exists(engine.url):
-        print("CREATING DATABASE")
         create_database(engine.url)
 
         # Need to create the uuid extension in the test database if it doesn't exist
