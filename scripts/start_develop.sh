@@ -7,14 +7,14 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 function wait_for_db {
     echo "Waiting db startup..."
-    until docker-compose -f $SCRIPT_DIR/../docker/docker-compose.yml exec db pg_isready ; do sleep 1 ; done
+    until docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml exec db pg_isready ; do sleep 1 ; done
     echo "DB is ready!"
 }
 
-docker-compose -f $SCRIPT_DIR/../docker/docker-compose.yml up -d
+docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml up -d
 wait_for_db
 echo "Creating 'uuid-ossp' extension"
-docker-compose -f $SCRIPT_DIR/../docker/docker-compose.yml exec db psql --user postgres -d users_crud -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'
+docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml exec db psql --user postgres -d users-api -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'
 
 echo "Applying migrations"
-docker-compose -f $SCRIPT_DIR/../docker/docker-compose.yml exec users_crud poetry run manage migrate
+docker-compose -f "$SCRIPT_DIR"/../docker/docker-compose.yml exec users-api poetry run manage migrate

@@ -2,15 +2,15 @@
 
 from fastapi import FastAPI
 
-from users_crud.api.v1.routers import router
-from users_crud.schemas import ApiVersionModel
-from users_crud.settings import EnvironmentEnum, Settings, get_settings
+from users_api.api.v1.routers import router
+from users_api.schemas import ApiVersionModel
+from users_api.settings import EnvironmentEnum, Settings, get_settings
 
 settings = get_settings()
 
 app = FastAPI(
     title="Users API",
-    description="Users API",
+    description="Users API built with FastAPI and PostgreSQL",
     version=settings.API_VERSION,
     debug=settings.ENVIRONMENT == EnvironmentEnum.development,
     root_path=settings.ROOT_PATH,

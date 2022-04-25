@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from users_crud import crud, models, schemas
-from users_crud.api import deps
+from users_api import crud, models, schemas
+from users_api.api import deps
 
 router = APIRouter()
 

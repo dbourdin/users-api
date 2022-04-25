@@ -8,11 +8,11 @@ from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from users_crud import crud, schemas
-from users_crud.api import security
-from users_crud.db.session import SessionLocal
-from users_crud.models.user import User
-from users_crud.settings import get_settings
+from users_api import crud, schemas
+from users_api.api import security
+from users_api.db.session import SessionLocal
+from users_api.models.user import User
+from users_api.settings import get_settings
 
 settings = get_settings()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/login")

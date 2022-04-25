@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from users_crud.schemas import APIMessage, APISchema
+from users_api.schemas import APIMessage, APISchema
 
 
 class BaseUserSchema(APISchema):

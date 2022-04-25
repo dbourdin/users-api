@@ -2,5 +2,5 @@
 # imported by Alembic
 # flake8: noqa
 
-from users_crud.db.base_class import Base
-from users_crud.models import User
+from users_api.db.base_class import Base
+from users_api.models import User

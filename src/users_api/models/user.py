@@ -3,8 +3,8 @@
 from sqlalchemy import Boolean, Column, String
 from sqlalchemy.ext.declarative import declared_attr
 
-from users_crud.api import security
-from users_crud.db.base_class import Base
+from users_api.api import security
+from users_api.db.base_class import Base
 
 
 class User(Base):

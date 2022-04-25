@@ -6,7 +6,7 @@ from typing import Any
 from jose import jwt
 from passlib.context import CryptContext
 
-from users_crud.settings import get_settings
+from users_api.settings import get_settings
 
 settings = get_settings()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

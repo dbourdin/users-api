@@ -7,8 +7,8 @@ x-logging: &logging
     max-size: 10m
 
 services:
-  users_crud:
-    image: users_crud
+  users-api:
+    image: users_api:dev
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -18,9 +18,9 @@ services:
     ports:
       - 3000:3000
     tty: true
-#    command: sleep infinity
+    command: sleep infinity
     volumes:
-      - ../src/users_crud:/app/users_crud
+      - ../src/users_api:/app/users_api
       - ../tests:/app/tests
       - ../alembic:/app/alembic
       # Mount poetry files to edit them from inside the container

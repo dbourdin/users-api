@@ -1,6 +1,6 @@
 """API Version information."""
 
-from users_crud.schemas.base import APISchema
+from users_api.schemas.base import APISchema
 
 
 class ApiVersionModel(APISchema):

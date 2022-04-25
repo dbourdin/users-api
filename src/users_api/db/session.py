@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from users_crud.settings import get_settings
+from users_api.settings import get_settings
 
 settings = get_settings()
 

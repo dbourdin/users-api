@@ -2,9 +2,9 @@
 
 from sqlalchemy.orm import Session
 
-from users_crud.crud.base import CRUDBase
-from users_crud.models.user import User
-from users_crud.schemas import UserCreateDB, UserUpdateDB
+from users_api.crud.base import CRUDBase
+from users_api.models.user import User
+from users_api.schemas import UserCreateDB, UserUpdateDB
 
 
 class CRUDUser(CRUDBase[User, UserCreateDB, UserUpdateDB]):

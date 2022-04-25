@@ -1,7 +1,7 @@
 """Token Schemas."""
 from pydantic import BaseModel
 
-from users_crud.schemas import APISchema
+from users_api.schemas import APISchema
 
 
 class Token(BaseModel):

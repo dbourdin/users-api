@@ -9,7 +9,7 @@ import alembic.config
 import typer
 import uvicorn
 
-from users_crud.settings import get_settings
+from users_api.settings import get_settings
 
 app = typer.Typer()
 settings = get_settings()

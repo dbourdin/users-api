@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "users-crud"
+name = "users-api"
 version = "0.1.0"
-description = "Users CRUD using fastAPI"
+description = "Users API built with FastAPI and PostgreSQL"
 authors = ["Damian Bourdin <damian.bourdin@gmail.com>"]
 
 [tool.poetry.dependencies]
@@ -31,11 +31,11 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-manage = 'users_crud.cli.manage:app'
+manage = 'users_api.cli.manage:app'
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-known_first_party = ["users_crud"]
+known_first_party = ["users_api"]
 known_third_party = ["alembic"]
 default_section="THIRDPARTY"

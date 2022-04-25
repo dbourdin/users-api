@@ -1,7 +1,7 @@
-from users_crud.schemas.api import ApiVersionModel
-from users_crud.schemas.base import APIMessage, APISchema
-from users_crud.schemas.token import Token, TokenData
-from users_crud.schemas.user import (
+from users_api.schemas.api import ApiVersionModel
+from users_api.schemas.base import APIMessage, APISchema
+from users_api.schemas.token import Token, TokenData
+from users_api.schemas.user import (
     UserCreateDB,
     UserCreateIn,
     UserCreateOut,

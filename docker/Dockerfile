@@ -60,4 +60,4 @@ COPY --from=development /app/requirements.txt .
 RUN pip install -r requirements.txt
 
 EXPOSE 3000
-CMD ["uvicorn", "users_crud.app:app", "--host", "0.0.0.0", "--port", "3000", "--log-level", "info"]
+CMD ["uvicorn", "users_api.app:app", "--host", "0.0.0.0", "--port", "3000", "--log-level", "info"]

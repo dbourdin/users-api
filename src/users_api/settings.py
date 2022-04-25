@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import BaseSettings, PositiveInt, PostgresDsn, validator
 
-from users_crud.version import __version__
+from users_api.version import __version__
 
 
 class EnvironmentEnum(str, Enum):
@@ -40,7 +40,7 @@ class APISettings(BaseSettings):
     LOGLEVEL: LoggingEnum = LoggingEnum.info
 
     # Settings related to running an ASGI app
-    APP_MODULE: str = "users_crud.app:app"
+    APP_MODULE: str = "users_api.app:app"
     HOST: IPv4Address = "0.0.0.0"
     PORT: PositiveInt = 3000
 
@@ -61,7 +61,7 @@ class APISettings(BaseSettings):
     POSTGRES_DB: str
     SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
 
-    POSTGRES_TEST_DB: str | None = "test.users_crud"
+    POSTGRES_TEST_DB: str | None = "test.users_api"
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: str | None, values: dict[str, Any]) -> Any:
