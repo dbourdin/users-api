@@ -44,6 +44,24 @@ class APISettings(BaseSettings):
     HOST: IPv4Address = "0.0.0.0"
     PORT: PositiveInt = 3000
 
+    # Settings related to Postgres configuration
+    POSTGRES_SERVER: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    POSTGRES_TEST_DB: str | None = "test.users_api"
+    SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
+
+    # Settings related to JWT
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALGORITHM: str = "HS256"
+    SECRET_KEY: str
+
+    # To use the API behind a proxy, set this variable to the desired base route
+    # This will make the /docs URL work properly
+    # More info here: https://fastapi.tiangolo.com/advanced/behind-a-proxy/
+    ROOT_PATH: str = ""
+
     def get_uvicorn_settings(self) -> dict[str, Any]:
         """Get a dictionary with settings ready to be used by Uvicorn."""
         return {
@@ -53,15 +71,6 @@ class APISettings(BaseSettings):
             "log_level": self.LOGLEVEL.lower(),  # Uvicorn expects lowercase strings
             "reload": self.ENVIRONMENT == EnvironmentEnum.development,
         }
-
-    # Settings related to Postgres configuration
-    POSTGRES_SERVER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
-
-    POSTGRES_TEST_DB: str | None = "test.users_api"
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: str | None, values: dict[str, Any]) -> Any:
@@ -75,16 +84,6 @@ class APISettings(BaseSettings):
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB')}",
         )
-
-    # Settings related to JWT
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    ALGORITHM: str = "HS256"
-    SECRET_KEY: str
-
-    # To use the API behind a proxy, set this variable to the desired base route
-    # This will make the /docs URL work properly
-    # More info here: https://fastapi.tiangolo.com/advanced/behind-a-proxy/
-    ROOT_PATH: str = ""
 
 
 class Settings(APISettings):
