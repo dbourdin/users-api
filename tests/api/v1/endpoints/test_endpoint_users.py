@@ -8,8 +8,8 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
-from tests.conftest import TEST_USER
-from users_api import schemas
+from tests.conftest import TEST_SUPERUSER, TEST_USER
+from users_api import models, schemas
 
 
 @mock.patch("users_api.api.v1.endpoints.users.crud.user")
@@ -110,3 +110,32 @@ def test_get_user_as_superuser(
     received = schemas.UserGet.parse_raw(response.text)
     expected = schemas.UserGet.parse_obj(TEST_USER)
     assert received == expected
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_list_users(
+    crud_user_mock,
+    client: TestClient,
+    # override get_current_user to return superuser
+    mock_current_user_superuser,
+):
+    """Get Users List via GET."""
+    users = [models.User(**TEST_SUPERUSER)]
+    crud_user_mock.get_multi.return_value = users
+    response = client.get("/v1/users")
+    assert response.status_code == status.HTTP_200_OK, response.text
+
+    received = [schemas.UserList.parse_obj(user) for user in response.json()]
+    expected = [schemas.UserList.from_orm(user) for user in users]
+    assert received == expected
+
+    crud_user_mock.get_multi.assert_called_once()
+
+
+def test_list_users_without_permissions_throws_401(
+    client: TestClient,
+):
+    """Get Users List returns 401 if unauthorized."""
+    response = client.get("/v1/users")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED, response.text
