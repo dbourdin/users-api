@@ -18,7 +18,7 @@ services:
     ports:
       - 3000:3000
     tty: true
-    command: sleep infinity
+#    command: sleep infinity
     volumes:
       - ../src/users_api:/app/users_api
       - ../tests:/app/tests
