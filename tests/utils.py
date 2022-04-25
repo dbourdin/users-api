@@ -40,6 +40,7 @@ class DependencyOverrider:
 
 dt = datetime.now(timezone.utc)
 TEST_USER = {
+    "id": 1,
     "uuid": uuid.uuid4(),
     "username": "test_username",
     "password": "password",
@@ -48,6 +49,7 @@ TEST_USER = {
 }
 
 TEST_SUPERUSER = TEST_USER.copy()
+TEST_SUPERUSER["id"] = 2
 TEST_SUPERUSER["uuid"] = uuid.uuid4()
 TEST_SUPERUSER["username"] = "admin"
 TEST_SUPERUSER["password"] = "admin"
