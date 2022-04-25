@@ -1,1 +1,1 @@
-"""Application endpoints module."""
+# flake8: noqa
