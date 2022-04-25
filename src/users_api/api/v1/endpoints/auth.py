@@ -1,7 +1,5 @@
 """Endpoints related to Authentication."""
 
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -12,8 +10,6 @@ from users_api.api.security import create_access_token
 from users_api.models.user import User
 
 router = APIRouter()
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @router.post(
@@ -43,8 +39,5 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data=user.uuid, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data=user.uuid)
     return schemas.Token(access_token=access_token, token_type="bearer")
