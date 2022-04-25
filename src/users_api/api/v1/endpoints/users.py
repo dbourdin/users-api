@@ -139,24 +139,26 @@ async def update(
         user_in (schemas.UserUpdateIn): The new data
 
     Raises:
-        HTTPException: When a resource with the given id is not found
+        HTTPException: List of exceptions:
+            - HTTP_403_FORBIDDEN: If the user doesn't have enough privileges.
+            - HTTP_404_NOT_FOUND: If the user does not exist.
     """
     if current_user.uuid == user_id:
-        instance_db = current_user
+        db_user = current_user
     elif current_user.is_superuser:
-        instance_db = crud.user.get_by_uuid(db, uuid=user_id)
+        db_user = crud.user.get_by_uuid(db, uuid=user_id)
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough privileges",
         )
 
-    if instance_db is None:
+    if db_user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    updated_instance = crud.user.update(db, db_obj=instance_db, obj_in=user_in)
+    updated_instance = crud.user.update(db, db_obj=db_user, obj_in=user_in)
 
     return updated_instance
 
