@@ -11,8 +11,6 @@ from users_api.settings import get_settings
 settings = get_settings()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-ALGORITHM = "HS256"
-
 
 def create_access_token(data: str | Any, expires_delta: timedelta = None) -> str:
     """Create access token.
@@ -31,7 +29,11 @@ def create_access_token(data: str | Any, expires_delta: timedelta = None) -> str
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(data)}
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
+    )
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

@@ -78,6 +78,7 @@ class APISettings(BaseSettings):
 
     # Settings related to JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALGORITHM: str = "HS256"
     SECRET_KEY: str
 
     # To use the API behind a proxy, set this variable to the desired base route
