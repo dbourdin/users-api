@@ -6,6 +6,7 @@ from unittest import mock
 
 from fastapi import status
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
 from users_api import schemas
 
@@ -36,5 +37,24 @@ def test_create_user(
     received = schemas.UserCreateOut.parse_raw(response.text)
     expected = schemas.UserCreateOut.parse_obj(return_value)
     assert received == expected
+
+    crud_user_mock.create.assert_called_once()
+
+
+@mock.patch("users_api.api.v1.endpoints.users.crud.user")
+def test_create_user_integrity_error_throws_400(
+    crud_user_mock,
+    client: TestClient,
+):
+    """Create a User via POST."""
+    user = {"username": "test_user", "password": "password"}
+    data_to_send = schemas.UserCreateIn(**user)
+    crud_user_mock.create.side_effect = IntegrityError(
+        "IntegrityError", "params", "orig"
+    )
+
+    response = client.post("/v1/users", json=data_to_send.dict())
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.text
 
     crud_user_mock.create.assert_called_once()
