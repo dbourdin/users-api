@@ -190,8 +190,10 @@ async def update_password(
         update_password_data (schemas.UserUpdatePasswordIn): The update password data
 
     Raises:
-        HTTPException: When a resource with the given id is not found, the user
-            does not have enough privileges or the submitted password is incorrect
+        HTTPException: List of exceptions:
+            - HTTP_400_BAD_REQUEST: If old_password is incorrect.
+            - HTTP_403_FORBIDDEN: If the user doesn't have enough privileges.
+            - HTTP_404_NOT_FOUND: If the user does not exist.
     """
     if current_user.uuid == user_id:
         db_user = current_user
