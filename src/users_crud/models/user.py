@@ -1,6 +1,7 @@
 """User database table."""
 
 from sqlalchemy import Boolean, Column, String
+from sqlalchemy.ext.declarative import declared_attr
 
 from users_crud.api import security
 from users_crud.db.base_class import Base
@@ -28,3 +29,8 @@ class User(Base):
     def verify_password(self, password):
         """Password validator."""
         return security.verify_password(password, self.password_hash)
+
+    @declared_attr
+    def __tablename__(cls) -> str:
+        """Return the table name."""
+        return "users"
