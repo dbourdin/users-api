@@ -46,3 +46,9 @@ TEST_USER = {
     "created_at": dt,
     "updated_at": dt,
 }
+
+TEST_SUPERUSER = TEST_USER.copy()
+TEST_SUPERUSER["uuid"] = uuid.uuid4()
+TEST_SUPERUSER["username"] = "admin"
+TEST_SUPERUSER["password"] = "admin"
+TEST_SUPERUSER["is_superuser"] = True
