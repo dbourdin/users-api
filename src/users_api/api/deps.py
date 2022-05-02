@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from users_api import crud, schemas
-from users_api.api import security
 from users_api.db.session import SessionLocal
 from users_api.models.user import User
 from users_api.settings import get_settings
@@ -49,7 +48,7 @@ def get_current_user(
     """
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = schemas.TokenData(**payload)
     except (jwt.JWTError, ValidationError):
